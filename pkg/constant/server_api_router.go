@@ -131,6 +131,8 @@ const (
 
 	// auth
 	GetUsersToken = RouterAuth + "/user_token"
+	// rtc
+	RtcSignalMessage = "/rtc/signal_message"
 )
 const (
 	RouterGroup        = "/group"

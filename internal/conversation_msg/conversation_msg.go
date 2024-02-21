@@ -27,6 +27,7 @@ import (
 	"github.com/openimsdk/openim-sdk-core/v3/internal/full"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/group"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/interaction"
+	"github.com/openimsdk/openim-sdk-core/v3/internal/rtc"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/user"
 	"github.com/openimsdk/openim-sdk-core/v3/open_im_sdk_callback"
 	"github.com/openimsdk/openim-sdk-core/v3/pkg/ccontext"
@@ -64,6 +65,7 @@ type Conversation struct {
 	group                *group.Group
 	user                 *user.User
 	file                 *file.File
+	rtc                  *rtc.Signaling
 	business             *business.Business
 	messageController    *MessageController
 	cache                *cache.Cache[string, *model_struct.LocalConversation]
@@ -90,7 +92,7 @@ func (c *Conversation) SetBatchMsgListener(batchMsgListener func() open_im_sdk_c
 
 func NewConversation(ctx context.Context, longConnMgr *interaction.LongConnMgr, db db_interface.DataBase,
 	ch chan common.Cmd2Value, friend *friend.Friend, group *group.Group, user *user.User, business *business.Business,
-	full *full.Full, file *file.File) *Conversation {
+	full *full.Full, file *file.File, rtc *rtc.Signaling) *Conversation {
 	info := ccontext.Info(ctx)
 	n := &Conversation{db: db,
 		LongConnMgr:          longConnMgr,
@@ -104,6 +106,7 @@ func NewConversation(ctx context.Context, longConnMgr *interaction.LongConnMgr, 
 		full:                 full,
 		business:             business,
 		file:                 file,
+		rtc:                  rtc,
 		messageController:    NewMessageController(db, ch),
 		IsExternalExtensions: info.IsExternalExtensions(),
 		maxSeqRecorder:       NewMaxSeqRecorder(),

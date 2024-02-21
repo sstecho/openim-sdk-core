@@ -50,3 +50,7 @@ func SetCustomBusinessListener(listener open_im_sdk_callback.OnCustomBusinessLis
 func SetMessageKvInfoListener(listener open_im_sdk_callback.OnMessageKvInfoListener) {
 	listenerCall(UserForSDK.SetMessageKvInfoListener, listener)
 }
+
+func SetRtcListener(listener open_im_sdk_callback.OnSignalingListener) {
+	listenerCall(UserForSDK.SetRtcListener, listener)
+}

@@ -29,6 +29,7 @@ import (
 	"github.com/openimsdk/openim-sdk-core/v3/internal/full"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/group"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/interaction"
+	"github.com/openimsdk/openim-sdk-core/v3/internal/rtc"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/third"
 	"github.com/openimsdk/openim-sdk-core/v3/internal/user"
 	"github.com/openimsdk/openim-sdk-core/v3/open_im_sdk_callback"
@@ -88,6 +89,7 @@ type LoginMgr struct {
 	user         *user.User
 	file         *file.File
 	business     *business.Business
+	rtc          *rtc.Signaling
 
 	full         *full.Full
 	db           db_interface.DataBase
@@ -109,7 +111,7 @@ type LoginMgr struct {
 	advancedMsgListener  open_im_sdk_callback.OnAdvancedMsgListener
 	batchMsgListener     open_im_sdk_callback.OnBatchMsgListener
 	userListener         open_im_sdk_callback.OnUserListener
-	signalingListener    open_im_sdk_callback.OnSignalingListener
+	rtcListener          open_im_sdk_callback.OnSignalingListener
 	businessListener     open_im_sdk_callback.OnCustomBusinessListener
 	msgKvListener        open_im_sdk_callback.OnMessageKvInfoListener
 
@@ -149,8 +151,8 @@ func (u *LoginMgr) UserListener() open_im_sdk_callback.OnUserListener {
 	return u.userListener
 }
 
-func (u *LoginMgr) SignalingListener() open_im_sdk_callback.OnSignalingListener {
-	return u.signalingListener
+func (u *LoginMgr) RtcListener() open_im_sdk_callback.OnSignalingListener {
+	return u.rtcListener
 }
 
 func (u *LoginMgr) BusinessListener() open_im_sdk_callback.OnCustomBusinessListener {
@@ -204,6 +206,10 @@ func (u *LoginMgr) Full() *full.Full {
 	return u.full
 }
 
+func (u *LoginMgr) Rtc() *rtc.Signaling {
+	return u.rtc
+}
+
 func (u *LoginMgr) Group() *group.Group {
 	return u.group
 }
@@ -243,6 +249,11 @@ func (u *LoginMgr) SetUserListener(userListener open_im_sdk_callback.OnUserListe
 func (u *LoginMgr) SetCustomBusinessListener(listener open_im_sdk_callback.OnCustomBusinessListener) {
 	u.businessListener = listener
 }
+
+func (u *LoginMgr) SetRtcListener(listener open_im_sdk_callback.OnSignalingListener) {
+	u.rtcListener = listener
+}
+
 func (u *LoginMgr) GetLoginUserID() string {
 	return u.loginUserID
 }
@@ -340,6 +351,9 @@ func (u *LoginMgr) login(ctx context.Context, userID, token string) error {
 	u.checkSendingMessage(ctx)
 	log.ZDebug(ctx, "NewDataBase ok", "userID", userID, "dataDir", u.info.DataDir, "login cost time", time.Since(t1))
 	u.user = user.NewUser(u.db, u.loginUserID, u.conversationCh)
+	//rtc
+	u.rtc = rtc.NewRtc(u.db, u.loginUserID, u.conversationCh)
+
 	u.file = file.NewFile(u.db, u.loginUserID)
 	u.friend = friend.NewFriend(u.loginUserID, u.db, u.user, u.conversationCh)
 
@@ -351,7 +365,7 @@ func (u *LoginMgr) login(ctx context.Context, userID, token string) error {
 
 	u.msgSyncer, _ = interaction.NewMsgSyncer(ctx, u.conversationCh, u.pushMsgAndMaxSeqCh, u.loginUserID, u.longConnMgr, u.db, 0)
 	u.conversation = conv.NewConversation(ctx, u.longConnMgr, u.db, u.conversationCh,
-		u.friend, u.group, u.user, u.business, u.full, u.file)
+		u.friend, u.group, u.user, u.business, u.full, u.file, u.rtc)
 	u.setListener(ctx)
 	u.run(ctx)
 	u.setLoginStatus(Logged)
@@ -367,6 +381,7 @@ func (u *LoginMgr) setListener(ctx context.Context) {
 	setListener(ctx, &u.advancedMsgListener, u.AdvancedMsgListener, u.conversation.SetMsgListener, newEmptyAdvancedMsgListener)
 	setListener(ctx, &u.batchMsgListener, u.BatchMsgListener, u.conversation.SetBatchMsgListener, nil)
 	setListener(ctx, &u.businessListener, u.BusinessListener, u.business.SetListener, newEmptyCustomBusinessListener)
+	setListener(ctx, &u.rtcListener, u.RtcListener, u.rtc.SetListener, nil)
 }
 
 func setListener[T any](ctx context.Context, listener *T, getter func() T, setFunc func(listener func() T), newFunc func(context.Context) T) {

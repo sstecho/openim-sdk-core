@@ -683,7 +683,8 @@ func (c *Conversation) doNotificationNew(c2v common.Cmd2Value) {
 				} else if utils2.Contain(v.ContentType, constant.GroupApplicationRejectedNotification, constant.GroupApplicationAcceptedNotification, constant.JoinGroupApplicationNotification) {
 					c.group.DoNotification(ctx, v)
 				} else if v.ContentType > constant.SignalingNotificationBegin && v.ContentType < constant.SignalingNotificationEnd {
-
+					log.ZDebug(ctx, "SignalingNotificationBegin", "msg", v)
+					c.rtc.DoNotification(ctx, v)
 					continue
 				}
 			case constant.GroupChatType, constant.SuperGroupChatType:

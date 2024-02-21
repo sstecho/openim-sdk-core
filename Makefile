@@ -227,7 +227,7 @@ ios:
 .PHONY: android
 android:
 	go get golang.org/x/mobile/bind
-	GOARCH=amd64 gomobile bind -v -trimpath -ldflags="-s -w" -o ./open_im_sdk.aar -target=android ./open_im_sdk/ ./open_im_sdk_callback/
+	GOARCH=amd64 gomobile bind -v -trimpath -ldflags="-s -w" -o ./core-sdk-0.0.1.aar -target=android ./open_im_sdk/ ./open_im_sdk_callback/
 
 # Targets
 .PHONY: release

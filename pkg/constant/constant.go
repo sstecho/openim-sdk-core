@@ -120,6 +120,15 @@ const (
 
 	SignalingNotificationBegin = 1600
 	SignalingNotification      = 1601
+	RoomParticipantsConnectedNotification    = 1602
+	RoomParticipantsDisconnectedNotification = 1603
+	StreamChangedNotification                = 1604
+	CustomSignalNotification                 = 1605
+
+	SignalingInviteNotification = 1606
+	SignalingAcceptNotification = 1607
+	SignalingRejectNotification = 1608
+	SignalingCancelNotification = 1609
 	SignalingNotificationEnd   = 1649
 
 	SuperGroupNotificationBegin         = 1650
