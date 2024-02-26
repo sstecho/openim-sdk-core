@@ -147,6 +147,7 @@ func CallApi[T any](ctx context.Context, api string, req any) (*T, error) {
 	if err := ApiPost(ctx, api, req, &resp); err != nil {
 		return nil, err
 	}
+	log.ZDebug(ctx, "CallApi in post:", "api", api, "req", req, "resp", &resp)
 	return &resp, nil
 }
 
